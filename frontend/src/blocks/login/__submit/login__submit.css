@@ -1,0 +1,16 @@
+.login__submit {
+    font-family: 'Inter', Arial, Helvetica, sans-serif;
+    margin-top: 216px;
+    border-radius: 2px;
+    height: 50px;
+    max-width: 358px;
+    font-size: 18px;
+    font-weight: 400;
+    padding: 0;
+}
+
+.login__submit:hover {
+    cursor: pointer;
+    opacity: 0.6;
+    transition: 0.5s linear;
+  }

@@ -1,0 +1,13 @@
+.login__login {
+    font-family: 'Inter', Arial, Helvetica, sans-serif;
+    color: #ffffff;
+    margin: 15px 0 0;
+    font-size: 14px;
+    font-weight: 400;
+  }
+  
+  .login__login:hover {
+    cursor: pointer;
+    opacity: 0.6;
+    transition: 0.5s linear;
+  } 

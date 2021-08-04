@@ -1,0 +1,9 @@
+.form {
+    max-width: 430px;
+}
+
+@media (max-width: 580px) {
+    .form {
+        max-width: 282px;
+    }
+}
