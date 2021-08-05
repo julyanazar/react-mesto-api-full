@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
-const cors = require('cors');
 
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
@@ -30,7 +29,6 @@ mongoose.connect('mongodb://localhost:27017/mestodbnew', {
   useUnifiedTopology: true,
 });
 
-app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
