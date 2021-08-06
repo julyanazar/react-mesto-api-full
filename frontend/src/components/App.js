@@ -25,7 +25,7 @@ function App() {
     const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = React.useState(false);
     const [selectedCard, setSelectedCard] = React.useState(null);
 
-    const [currentUser, setCurrentUser] = React.useState({});
+    const [currentUser, setCurrentUser] = React.useState({_id: null, avatar: ''});
 
     const [cards, setCards] = React.useState([]);
 
@@ -38,8 +38,8 @@ function App() {
     React.useEffect(() => {
 
         api.getUserInfo()
-            .then((cardList) => {
-                setCurrentUser(cardList);
+            .then((user) => {
+                setCurrentUser(user);
             })
             .catch(err => { console.log(err) });
     }, []);
@@ -68,7 +68,7 @@ function App() {
 
     function handleCardLike(card) {
         // Проверяем, есть ли уже лайк на этой карточке
-        const isLiked = card.likes.some(i => i._id === currentUser._id);
+        const isLiked = card.likes.some(i => i === currentUser._id);
 
         // Отправляем запрос в API и получаем обновлённые данные карточки
         const changeLike = isLiked ? api.deleteLikeCard(card._id) : api.likeCard(card._id)
@@ -148,7 +148,7 @@ function App() {
         api.addCard(name, link)
             .then((card) => {
 
-                setCards([card, ...cards]);
+                setCards([card.data, ...cards]);
                 setIsAddPlacePopupOpen(false);
 
             })
@@ -156,9 +156,9 @@ function App() {
     }
 
     function registration(email, password) {
-        Auth.register(email, password)
+         Auth.register(email, password)
             .then((res) => {
-                if (res.status === 201) {
+                if (res.status === 201 || res.status === 200) {
 
                     handleInfoTooltipContent({
                         iconPath: resultIcon,
@@ -199,6 +199,10 @@ function App() {
                     })
                     .catch(err => console.log(err));
                 setLoggedIn(true);
+
+                api.getUserInfo().then((user) => setCurrentUser(user.data))
+                .catch(error => api.errorHandler(error));
+
                 handleInfoTooltipContent({
                     iconPath: resultIcon,
                     text: 'Вы успешно авторизовались!'
@@ -220,8 +224,10 @@ function App() {
 
 
     function handleSignOut() {
+        setCurrentUser({_id: null, avatar: ''})
         setLoggedIn(false);
         localStorage.removeItem('jwt');
+        api.updateHeaders();
         setEmail('');
         history.push('/sign-in');
     }

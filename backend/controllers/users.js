@@ -5,6 +5,12 @@ const User = require('../models/user');
 const BadRequest = require('../errors/BadRequest');
 const NotFound = require('../errors/NotFound');
 const Conflict = require('../errors/Conflict');
+const Forbidden = require('../errors/Forbidden');
+const Auth = require('../errors/Auth');
+
+const isAuthorized = require('../helpers/isAuthorized');
+
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 const getUsers = (req, res, next) => User.find({})
   .then((users) => res.status(200).send(users))
@@ -29,11 +35,7 @@ const createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.send({
-      data: {
-        name: user.name, about: user.about, avatar: user.avatar, email: user.email,
-      },
-    }))
+    .then((user) => res.status(200).send({ mail: user.email }))
     .catch((err) => {
       if (err.name === 'MongoError' && err.code === 11000) {
         throw new Conflict('Пользователь с таким email уже существует');
@@ -75,22 +77,23 @@ const login = (req, res, next) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign(
-        { _id: user._id },
-        'secret-key',
-        { expiresIn: '7d' },
-      );
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
 
-      res.cookie('jwt', token, {
-        maxAge: 3600000 * 24 * 7,
-        httpOnly: true,
-      })
-        .send({ token });
+      return res.send({ token });
+    })
+    .catch(() => {
+      throw new Auth('Авторизация не пройдена');
     })
     .catch(next);
 };
 
 const getCurrentUser = (req, res, next) => {
+  const token = req.headers.authorization;
+
+  if (!isAuthorized(token)) {
+    throw new Forbidden('Доступ запрещен');
+  }
+
   User.findById(req.user._id)
     .orFail()
     .catch(() => {

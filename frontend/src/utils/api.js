@@ -96,13 +96,21 @@ class Api {
         return Promise.reject(`Ошибка! ${res.status}`);
     }
 
+    updateHeaders() {
+        this._headers = {
+          'Content-Type': 'application/json',
+          'Authorization': `${localStorage.getItem('jwt')}`,
+        }
+      }
+
 }
 
 const api = new Api({
     url: 'http://api.mesto.website.nomoredomains.club',
     credentials: 'include',
     headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `${localStorage.getItem('jwt')}`,
     }
 });
 

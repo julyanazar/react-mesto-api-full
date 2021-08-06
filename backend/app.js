@@ -1,7 +1,7 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
-const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
 
 const usersRouter = require('./routes/users');
@@ -57,7 +57,6 @@ mongoose.connect('mongodb://localhost:27017/mestodbnew', {
 });
 
 app.use(express.json());
-app.use(cookieParser());
 
 app.use(requestLogger); // подключаем логгер запросов
 
