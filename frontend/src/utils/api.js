@@ -4,25 +4,32 @@ class Api {
         this._headers = headers;
     }
 
-    getInitialData() {
-        return Promise.all([this.getUserInfo(), this.getInitialCards()]);
+    getInitialData(jwt) {
+        return Promise.all([this.getInitialCards(jwt), this.getUserInfo(jwt)])
     }
 
-    // Получить доступные карточки
-    getInitialCards() {
-        return fetch(`${this._url}/cards`, {
-            headers: this._headers
+    getInitialCards(jwt) {
+        return fetch(this._url+`cards`, {
+            headers: {
+                "content-type": "application/json",
+                "Authorization" : `Bearer ${jwt}`
+            }
         })
-            .then(res => this._checkRequestResult(res));
+        .then(this._checkResponse);
     }
 
-    // Получить данные пользователя
-    getUserInfo() {
-        return fetch(`${this._url}/users/me`, {
-            headers: this._headers
+
+    getUserInfo(jwt) {
+        return fetch(this._url+`users/me`, {
+            method: 'GET',
+            headers: {
+                "content-type": "application/json",
+                "Authorization" : `Bearer ${jwt}`
+            }
         })
-            .then(res => this._checkRequestResult(res));
+        .then(res => this._checkRequestResult(res));
     }
+
 
     // Редактировать данные пользователя
     editUserInfo(name, about) {
