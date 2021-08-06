@@ -1,49 +1,51 @@
-export const BASE_URL = 'https://api.mesto.website.nomoredomains.club';
+class Auth {
+    constructor(config) {
+        this._url = config.url;
+        this._headers = config.headers;
+    }
 
-export const register = (email, password) => {
-    return fetch(`${BASE_URL}/signup`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-    })
-};
+    _checkResponse(res) {
+        if (res.ok) {
+            return res.json();
+        }
+        return Promise.reject(`Ошибка ${res.status}`);
+    }
 
-export const authorize = (email, password) => {
-    return fetch(`${BASE_URL}/signin`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password })
-    })
-        .then((res) => {
-            if (res.status === 400) {
-                throw new Error('Не все поля заполнены');
-            } else if (res.status === 401) {
-                throw new Error('Email не зарегистрирован');
-            } else return res.json();
+    register(data) {
+        return fetch(this._url+`signup`, {
+            method: 'POST',
+            headers: this._headers,
+            body: JSON.stringify(data)
         })
-        .then((data) => {
-            console.log(data)
-            if (data.token) {
-                localStorage.setItem('jwt', data.token);
-                return data.token;
+            .then(this._checkResponse);
+    }
+
+    authorize(data) {
+        return fetch(this._url+`signin`, {
+            method: 'POST',
+            headers: this._headers,
+            body: JSON.stringify(data)
+        })
+            .then(this._checkResponse);
+    }
+
+    getContent(jwt) {
+        return fetch(this._url+`users/me`, {
+            method: 'GET',
+            headers: {
+                "content-type": "application/json",
+                "Authorization" : `Bearer ${jwt}`
             }
         })
+            .then(this._checkResponse);
+    }
 }
 
-export const getContent = (token) => {
-    return fetch(`${BASE_URL}/users/me`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-        },
-    })
-        .then((res) => {
-            return res.json()
-        })
-        .then((data) => data)
-}
+const apiAuth = new Auth ({
+    url: 'https://api.mesto.website.nomoredomains.club',
+    headers: {
+        "content-type": "application/json"
+    }
+})
+
+export default apiAuth;
