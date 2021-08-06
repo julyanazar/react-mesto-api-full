@@ -25,7 +25,7 @@ function App() {
     const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = React.useState(false);
     const [selectedCard, setSelectedCard] = React.useState(null);
 
-    const [currentUser, setCurrentUser] = React.useState({_id: null, avatar: ''});
+    const [currentUser, setCurrentUser] = React.useState({});
 
     const [cards, setCards] = React.useState([]);
 
@@ -58,8 +58,9 @@ function App() {
         if (jwt) {
             Auth.getContent(jwt)
                 .then((res) => {
+                    console.log(res)
                     setLoggedIn(true);
-                    setEmail(res.data.email);
+                    setEmail(res.currentUser.email);
                     history.push('/');
                 })
                 .catch(err => console.log(err));
@@ -195,7 +196,7 @@ function App() {
                 }
                 Auth.getContent(data)
                     .then((res) => {
-                        setEmail(res.data.email);
+                        setEmail(res.currentUser.email);
                     })
                     .catch(err => console.log(err));
                 setLoggedIn(true);

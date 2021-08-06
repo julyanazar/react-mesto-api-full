@@ -4,7 +4,6 @@ export const BASE_URL = 'http://api.mesto.website.nomoredomains.club';
 export const register = (email, password) => {
     return fetch(`${BASE_URL}/signup`, {
         method: 'POST',
-        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -14,7 +13,6 @@ export const register = (email, password) => {
 
 export const authorize = (email, password) => {
     return fetch(`${BASE_URL}/signin`, {
-        credentials: 'include',
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -40,7 +38,6 @@ export const authorize = (email, password) => {
 
 export const getContent = (token) => {
     return fetch(`${BASE_URL}/users/me`, {
-        credentials: 'include',
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

@@ -107,7 +107,6 @@ class Api {
 
 const api = new Api({
     url: 'http://api.mesto.website.nomoredomains.club',
-    credentials: 'include',
     headers: {
         'Content-Type': 'application/json',
         'Authorization': `${localStorage.getItem('jwt')}`,
