@@ -56,7 +56,7 @@ const likeCard = (req, res, next) => {
     .orFail(() => {
       throw new NotFound('Карточка с таким id не найдена');
     })
-    .then((likes) => res.send({ data: likes }))
+    .then((card) => res.send({ card }))
     .catch(next);
 };
 
@@ -69,7 +69,7 @@ const dislikeCard = (req, res, next) => {
     .orFail(() => {
       throw new NotFound('Карточка с таким id не найдена');
     })
-    .then((likes) => res.send({ data: likes }))
+    .then((card) => res.send({ card }))
     .catch(next);
 };
 
