@@ -49,7 +49,6 @@ function App() {
         if (loggedIn) {
           api.getInitialCards()
             .then((cardsObj) => {
-              console.log('data из useEffect', cardsObj.data)
               setCards(cardsObj.reverse())
             })
             .catch((err) => console.log(err))
