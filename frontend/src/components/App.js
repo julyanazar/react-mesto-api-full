@@ -39,7 +39,7 @@ function App() {
 
         api.getUserInfo()
             .then((user) => {
-                setCurrentUser(user);
+                setCurrentUser(user.currentUser);
             })
             .catch(err => { console.log(err) });
     }, []);
@@ -48,7 +48,7 @@ function App() {
 
         api.getInitialCards()
             .then((cardList) => {
-                setCards(cardList);
+                setCards(cardList.reverse());
             })
             .catch(err => { console.log(err) });
     }, []);
@@ -138,7 +138,7 @@ function App() {
         api.editUserAvatar(avatar)
             .then((updatedUser) => {
 
-                setCurrentUser(updatedUser);
+                setCurrentUser(updatedUser.data);
                 setIsEditAvatarPopupOpen(false);
 
             })

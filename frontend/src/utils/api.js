@@ -5,7 +5,7 @@ class Api {
     }
 
     getInitialData() {
-        return Promise.all([this.getUserInfo(), this.getInitialCards()]);
+        return Promise.all([this.getUserInfo(), this.getInitialCards()])
     }
 
     // Получить доступные карточки
