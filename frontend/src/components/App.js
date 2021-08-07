@@ -36,22 +36,25 @@ function App() {
     const history = useHistory();
 
     React.useEffect(() => {
-
-        api.getUserInfo()
+        if (loggedIn) {
+          api.getUserInfo()
             .then((user) => {
-                setCurrentUser(user.currentUser);
+              setCurrentUser(user.currentUser)
             })
-            .catch(err => { console.log(err) });
-    }, []);
+            .catch((err) => console.log(err))
+        }
+      }, [loggedIn])
 
     React.useEffect(() => {
-
-        api.getInitialCards()
-            .then((cardList) => {
-                setCards(cardList.reverse());
+        if (loggedIn) {
+          api.getInitialCards()
+            .then((cardsObj) => {
+              console.log('data из useEffect', cardsObj.data)
+              setCards(cardsObj.reverse())
             })
-            .catch(err => { console.log(err) });
-    }, []);
+            .catch((err) => console.log(err))
+        }
+      }, [loggedIn])
 
     React.useEffect(() => {
         const jwt = localStorage.getItem('jwt');
