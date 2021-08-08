@@ -35,7 +35,7 @@ class Api {
                 'Authorization': `Bearer ${token}`,
             },
             body: JSON.stringify(
-                {name: item.name, about: item.about}
+                { name: item.name, about: item.about }
             )
         })
             .then(res => this._checkRequestResult(res));
@@ -52,7 +52,7 @@ class Api {
             body: JSON.stringify({
                 name: item.name,
                 link: item.link
-              })
+            })
         })
             .then(res => this._checkRequestResult(res));
     }
@@ -94,7 +94,7 @@ class Api {
     }
 
     // Редактировать аватар пользователя
-    editUserAvatar(item,token) {
+    editUserAvatar(item, token) {
         return fetch(`${this._url}/users/me/avatar`, {
             method: 'PATCH',
             headers: {
@@ -105,7 +105,7 @@ class Api {
         })
             .then(res => this._checkRequestResult(res));
     }
-    
+
     _checkRequestResult(res) {
         if (res.ok) {
             return res.json();

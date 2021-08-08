@@ -35,21 +35,6 @@ function App() {
     const [email, setEmail] = React.useState('');
     const history = useHistory();
 
-    /*React.useEffect(() => {
-        const JWT = localStorage.getItem('jwt')
-        loggedIn &&
-            Promise.all([api.getUserInfo(JWT), api.getInitialCards(JWT)])
-                .then((data) => {
-                    const [userData, cardsData] = data;
-                    setCurrentUser(userData);
-                    setCards(cardsData.cards);
-                })
-                .catch((err) => {
-                    console.log(`Ошибка получения данных данных: ${err}`)
-                })
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [loggedIn, email])*/
-
     React.useEffect(() => {
         if (loggedIn) {
             const jwt = localStorage.getItem('jwt')
@@ -72,45 +57,45 @@ function App() {
             Auth.checkToken(jwt)
                 .then((res) => {
                     if (res) {
-                        setEmail(res.email);
+                        setEmail(res.currentUser.email);
                         setLoggedIn(true);
                         history.push('/');
                     }
                 })
-                .catch(err =>console.log(`Неверный токен: ${err}`));
+                .catch(err => console.log(`Неверный токен: ${err}`));
             return jwt;
         }
-    }    
+    }
 
     React.useEffect(() => {
         tokenCheck()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [loggedIn])
 
     function handleCardLike(card) {
-        if(loggedIn) {
+        if (loggedIn) {
             const jwt = localStorage.getItem('jwt')
-        // Проверяем, есть ли уже лайк на этой карточке
-        const isLiked = card.likes.some(i => i === currentUser._id);
+            // Проверяем, есть ли уже лайк на этой карточке
+            const isLiked = card.likes.some(i => i === currentUser._id);
 
-        // Отправляем запрос в API и получаем обновлённые данные карточки
-        const changeLike = isLiked ? api.deleteLikeCard(card._id, jwt) : api.likeCard(card._id, jwt)
-        changeLike.then((newCard) => {
-            setCards((state) => state.map((c) => c._id === card._id ? newCard.card : c));
-        })
-            .catch(err => { console.log(err) });
+            // Отправляем запрос в API и получаем обновлённые данные карточки
+            const changeLike = isLiked ? api.deleteLikeCard(card._id, jwt) : api.likeCard(card._id, jwt)
+            changeLike.then((newCard) => {
+                setCards((state) => state.map((c) => c._id === card._id ? newCard.card : c));
+            })
+                .catch(err => { console.log(err) });
         }
     }
 
     function handleCardDelete(card) {
-        if(loggedIn) {
+        if (loggedIn) {
             const jwt = localStorage.getItem('jwt')
             api.removeCard(card._id, jwt)
-            .then(() => {
-            const newCards = cards.filter((c) => c._id !== card._id);
-            setCards(newCards);
-        })
-            .catch(err => { console.log(err) });
+                .then(() => {
+                    const newCards = cards.filter((c) => c._id !== card._id);
+                    setCards(newCards);
+                })
+                .catch(err => { console.log(err) });
         }
     }
 
@@ -147,48 +132,48 @@ function App() {
     }
 
     function handleUpdateUser(item) {
-        if(loggedIn) {
-          const jwt = localStorage.getItem('jwt')
-          api.editUserInfo(item, jwt)
-          .then((item) => {
-            setCurrentUser({ 
-                ...currentUser,
-                name: item.data.name, 
-                about: item.data.about 
-             });
-             setIsEditProfilePopupOpen(false);
-       }).catch(err => console.error(err))
-          }
-     }
+        if (loggedIn) {
+            const jwt = localStorage.getItem('jwt')
+            api.editUserInfo(item, jwt)
+                .then((item) => {
+                    setCurrentUser({
+                        ...currentUser,
+                        name: item.data.name,
+                        about: item.data.about
+                    });
+                    setIsEditProfilePopupOpen(false);
+                }).catch(err => console.error(err))
+        }
+    }
 
     function handleUpdateAvatar(item) {
-        if(loggedIn) {
+        if (loggedIn) {
             const jwt = localStorage.getItem('jwt')
             api.editUserAvatar(item, jwt)
-            .then((item) => {
+                .then((item) => {
 
-                setCurrentUser({ 
-                    ...currentUser,
-                     avatar: item.data.avatar
-                 });
-                setIsEditAvatarPopupOpen(false);
+                    setCurrentUser({
+                        ...currentUser,
+                        avatar: item.data.avatar
+                    });
+                    setIsEditAvatarPopupOpen(false);
 
-            })
-            .catch(err => { console.log(err) });
+                })
+                .catch(err => { console.log(err) });
         }
     }
 
     function handleAddPlaceSubmit(item) {
-        if(loggedIn) {
+        if (loggedIn) {
             const jwt = localStorage.getItem('jwt')
             api.addCard(item, jwt)
-            .then((item) => {
+                .then((item) => {
 
-                setCards([item.data, ...cards])
-                setIsAddPlacePopupOpen(false);
+                    setCards([item.data, ...cards])
+                    setIsAddPlacePopupOpen(false);
 
-            })
-            .catch(err => { console.log(err) });
+                })
+                .catch(err => { console.log(err) });
         }
     }
 
