@@ -1,4 +1,4 @@
-import api from './api';
+
 export const BASE_URL = 'http://api.mesto.website.nomoredomains.club';
 
 export const register = (email, password) => {
@@ -30,18 +30,17 @@ export const authorize = (email, password) => {
             console.log(data)
             if (data.token) {
                 localStorage.setItem('jwt', data.token);
-                api.updateHeaders();
                 return data.token;
             }
         })
 }
 
-export const getContent = (token) => {
+export const checkToken = (token) => {
     return fetch(`${BASE_URL}/users/me`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `${token}`,
+            'Authorization': `Bearer ${token}`,
         },
     })
         .then((res) => {

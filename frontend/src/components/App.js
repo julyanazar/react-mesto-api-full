@@ -35,58 +35,83 @@ function App() {
     const [email, setEmail] = React.useState('');
     const history = useHistory();
 
-    React.useEffect(() => {
-        if (loggedIn) {
-          api.getUserInfo()
-            .then((user) => {
-              setCurrentUser(user.currentUser)
-            })
-            .catch((err) => console.log(err))
-        }
-      }, [loggedIn])
+    /*React.useEffect(() => {
+        const JWT = localStorage.getItem('jwt')
+        loggedIn &&
+            Promise.all([api.getUserInfo(JWT), api.getInitialCards(JWT)])
+                .then((data) => {
+                    const [userData, cardsData] = data;
+                    setCurrentUser(userData);
+                    setCards(cardsData.cards);
+                })
+                .catch((err) => {
+                    console.log(`Ошибка получения данных данных: ${err}`)
+                })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [loggedIn, email])*/
 
     React.useEffect(() => {
         if (loggedIn) {
-          api.getInitialCards()
-            .then((cardsObj) => {
-              setCards(cardsObj.reverse())
-            })
-            .catch((err) => console.log(err))
+            const jwt = localStorage.getItem('jwt')
+            api.getInitialCards(jwt)
+                .then((data) => {
+                    setCards(data.reverse())
+                })
+            api.getUserInfo(jwt)
+                .then((data) => {
+                    console.log(data)
+                    setCurrentUser(data.currentUser)
+                })
         }
-      }, [loggedIn])
+        return
+    }, [loggedIn])
 
-    React.useEffect(() => {
+    const tokenCheck = () => {
         const jwt = localStorage.getItem('jwt');
         if (jwt) {
-            Auth.getContent(jwt)
+            Auth.checkToken(jwt)
                 .then((res) => {
-                    console.log(res)
-                    setLoggedIn(true);
-                    setEmail(res.currentUser.email);
-                    history.push('/');
+                    if (res) {
+                        setEmail(res.email);
+                        setLoggedIn(true);
+                        history.push('/');
+                    }
                 })
-                .catch(err => console.log(err));
+                .catch(err =>console.log(`Неверный токен: ${err}`));
+            return jwt;
         }
-    }, [history]);
+    }    
+
+    React.useEffect(() => {
+        tokenCheck()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [loggedIn])
 
     function handleCardLike(card) {
+        if(loggedIn) {
+            const jwt = localStorage.getItem('jwt')
         // Проверяем, есть ли уже лайк на этой карточке
         const isLiked = card.likes.some(i => i === currentUser._id);
 
         // Отправляем запрос в API и получаем обновлённые данные карточки
-        const changeLike = isLiked ? api.deleteLikeCard(card._id) : api.likeCard(card._id)
+        const changeLike = isLiked ? api.deleteLikeCard(card._id, jwt) : api.likeCard(card._id, jwt)
         changeLike.then((newCard) => {
             setCards((state) => state.map((c) => c._id === card._id ? newCard.card : c));
         })
             .catch(err => { console.log(err) });
+        }
     }
 
     function handleCardDelete(card) {
-        api.removeCard(card._id).then(() => {
+        if(loggedIn) {
+            const jwt = localStorage.getItem('jwt')
+            api.removeCard(card._id, jwt)
+            .then(() => {
             const newCards = cards.filter((c) => c._id !== card._id);
             setCards(newCards);
         })
             .catch(err => { console.log(err) });
+        }
     }
 
     function handleEditProfileClick() {
@@ -121,45 +146,54 @@ function App() {
         setIsInfoTooltipPopupOpen(false);
     }
 
-    function handleUpdateUser({ name, about }) {
-        api.editUserInfo(name, about)
-            .then(() => {
+    function handleUpdateUser(item) {
+        if(loggedIn) {
+          const jwt = localStorage.getItem('jwt')
+          api.editUserInfo(item, jwt)
+          .then((item) => {
+            setCurrentUser({ 
+                ...currentUser,
+                name: item.data.name, 
+                about: item.data.about 
+             });
+             setIsEditProfilePopupOpen(false);
+       }).catch(err => console.error(err))
+          }
+     }
 
-                const updatedUser = { ...currentUser };
-                updatedUser.name = name;
-                updatedUser.about = about;
+    function handleUpdateAvatar(item) {
+        if(loggedIn) {
+            const jwt = localStorage.getItem('jwt')
+            api.editUserAvatar(item, jwt)
+            .then((item) => {
 
-                setCurrentUser({ ...updatedUser });
-                setIsEditProfilePopupOpen(false);
-
-            })
-            .catch(err => { console.log(err) });
-    }
-
-    function handleUpdateAvatar({ avatar }) {
-        api.editUserAvatar(avatar)
-            .then((updatedUser) => {
-
-                setCurrentUser(updatedUser.data);
+                setCurrentUser({ 
+                    ...currentUser,
+                     avatar: item.data.avatar
+                 });
                 setIsEditAvatarPopupOpen(false);
 
             })
             .catch(err => { console.log(err) });
+        }
     }
 
-    function handleAddPlaceSubmit({ name, link }) {
-        api.addCard(name, link)
-            .then((card) => {
+    function handleAddPlaceSubmit(item) {
+        if(loggedIn) {
+            const jwt = localStorage.getItem('jwt')
+            api.addCard(item, jwt)
+            .then((item) => {
 
-                setCards([card.data, ...cards]);
+                setCards([item.data, ...cards])
                 setIsAddPlacePopupOpen(false);
 
             })
             .catch(err => { console.log(err) });
+        }
     }
 
     function registration(email, password) {
-         Auth.register(email, password)
+        Auth.register(email, password)
             .then((res) => {
                 if (res.status === 201 || res.status === 200) {
 
@@ -190,29 +224,14 @@ function App() {
             })
     }
 
-    function authorization(email, password) {
+    const authorization = (email, password) => {
         Auth.authorize(email, password)
-            .then((data) => {
-                if (!data) {
-                    throw new Error('Произошла ошибка');
-                }
-                Auth.getContent(data)
-                    .then((res) => {
-                        setEmail(res.currentUser.email);
-                    })
-                    .catch(err => console.log(err));
-                setLoggedIn(true);
-
-                api.getUserInfo().then((user) => setCurrentUser(user.data))
-                .catch(error => api.errorHandler(error));
-
-                handleInfoTooltipContent({
-                    iconPath: resultIcon,
-                    text: 'Вы успешно авторизовались!'
-                })
-
-                setTimeout(history.push, 3000, "/");
-                setTimeout(closeAllPopups, 2500);
+            .then((res) => {
+                const JWT = res.token
+                JWT && localStorage.setItem('jwt', JWT)
+                setEmail(email)
+                setLoggedIn(true)
+                history.push('/')
             })
             .catch((err) => {
                 handleInfoTooltipContent({
@@ -220,17 +239,14 @@ function App() {
                     text: 'Что то пошло не так!'
                 })
                 handleInfoTooltipPopupOpen();
-
-                console.log(err)
+                console.log(`Ошибка авторизации: ${err}`)
             })
     }
 
-
     function handleSignOut() {
-        setCurrentUser({_id: null, avatar: ''})
+        setCurrentUser({ _id: null, avatar: '' })
         setLoggedIn(false);
         localStorage.removeItem('jwt');
-        api.updateHeaders();
         setEmail('');
         history.push('/sign-in');
     }

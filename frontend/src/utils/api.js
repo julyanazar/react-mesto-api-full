@@ -4,104 +4,114 @@ class Api {
         this._headers = headers;
     }
 
-    getInitialData() {
-        return Promise.all([this.getUserInfo(), this.getInitialCards()])
-    }
-
     // Получить доступные карточки
-    getInitialCards() {
+    getInitialCards(token) {
         return fetch(`${this._url}/cards`, {
-            headers: this._headers
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            }
         })
             .then(res => this._checkRequestResult(res));
     }
 
     // Получить данные пользователя
-    getUserInfo() {
+    getUserInfo(token) {
         return fetch(`${this._url}/users/me`, {
-            headers: this._headers
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            }
         })
             .then(res => this._checkRequestResult(res));
     }
 
     // Редактировать данные пользователя
-    editUserInfo(name, about) {
+    editUserInfo(item, token) {
         return fetch(`${this._url}/users/me`, {
             method: 'PATCH',
-            headers: this._headers,
-            body: JSON.stringify({
-                name: name,
-                about: about
-            })
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(
+                {name: item.name, about: item.about}
+            )
         })
             .then(res => this._checkRequestResult(res));
     }
 
     // Добавление новой карточки
-    addCard(name, link) {
+    addCard(item, token) {
         return fetch(`${this._url}/cards`, {
             method: 'POST',
-            headers: this._headers,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
             body: JSON.stringify({
-                name: name,
-                link: link
-            })
+                name: item.name,
+                link: item.link
+              })
         })
             .then(res => this._checkRequestResult(res));
     }
 
     // Поставить лайк
-    likeCard(cardId) {
+    likeCard(cardId, token) {
         return fetch(`${this._url}/cards/likes/${cardId}`, {
             method: 'PUT',
-            headers: this._headers,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
         })
             .then(res => this._checkRequestResult(res));
     }
 
     // Удалить лайк
-    deleteLikeCard(cardId) {
+    deleteLikeCard(cardId, token) {
         return fetch(`${this._url}/cards/likes/${cardId}`, {
             method: 'DELETE',
-            headers: this._headers,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
         })
             .then(res => this._checkRequestResult(res));
     }
 
     // Удалить карточку
-    removeCard(cardId) {
+    removeCard(cardId, token) {
         return fetch(`${this._url}/cards/${cardId}`, {
             method: 'DELETE',
-            headers: this._headers,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
         })
             .then(res => this._checkRequestResult(res));
     }
 
     // Редактировать аватар пользователя
-    editUserAvatar(urlAvatar) {
+    editUserAvatar(item,token) {
         return fetch(`${this._url}/users/me/avatar`, {
             method: 'PATCH',
-            headers: this._headers,
-            body: JSON.stringify({
-                avatar: urlAvatar
-            })
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ avatar: item.avatar })
         })
             .then(res => this._checkRequestResult(res));
     }
-
+    
     _checkRequestResult(res) {
         if (res.ok) {
             return res.json();
         }
         return Promise.reject(`Ошибка! ${res.status}`);
     }
-
-    updateHeaders() {
-        this._headers = {
-          'Content-Type': 'application/json',
-          'Authorization': `${localStorage.getItem('jwt')}`,
-        }
-      }
 
 }
 
