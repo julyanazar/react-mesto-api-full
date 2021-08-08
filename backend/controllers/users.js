@@ -5,10 +5,7 @@ const User = require('../models/user');
 const BadRequest = require('../errors/BadRequest');
 const NotFound = require('../errors/NotFound');
 const Conflict = require('../errors/Conflict');
-const Forbidden = require('../errors/Forbidden');
 const Auth = require('../errors/Auth');
-
-const isAuthorized = require('../helpers/isAuthorized');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -88,12 +85,6 @@ const login = (req, res, next) => {
 };
 
 const getCurrentUser = (req, res, next) => {
-  const token = req.headers.authorization;
-
-  if (!isAuthorized(token)) {
-    throw new Forbidden('Доступ запрещен');
-  }
-
   User.findById(req.user._id)
     .orFail()
     .catch(() => {
